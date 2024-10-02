@@ -34,3 +34,5 @@ pip install -r requirements.txt
 ```bash
 python app.py
 ```
+
+![img.png](img.png)
