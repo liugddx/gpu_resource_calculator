@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>大模型推理GPU资源计算器</title>
+    <!-- 引入Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- 引入自定义CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="card shadow">
+            <div class="card-body">
+                <h1 class="card-title text-center mb-4">大模型推理GPU资源计算器</h1>
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="layers" class="form-label">层数（L）：</label>
+                        <input type="number" class="form-control" id="layers" name="layers" value="{{ request.form.layers or 40 }}" min="1" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="hidden_size" class="form-label">隐藏大小（H）：</label>
+                        <input type="number" class="form-control" id="hidden_size" name="hidden_size" value="{{ request.form.hidden_size or 5120 }}" min="1" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="precision" class="form-label">精度（每个元素字节数）：</label>
+                        <input type="number" step="0.1" class="form-control" id="precision" name="precision" value="{{ request.form.precision or 2 }}" min="0.1" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="tokens" class="form-label">输出标记数量（tokens）：</label>
+                        <input type="number" class="form-control" id="tokens" name="tokens" value="{{ request.form.tokens or 2000 }}" min="1" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="concurrency" class="form-label">并发请求数量：</label>
+                        <input type="number" class="form-control" id="concurrency" name="concurrency" value="{{ request.form.concurrency or 10 }}" min="1" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="cache_percentage" class="form-label">KV缓存占GPU内存比例（%）：</label>
+                        <input type="number" step="0.1" class="form-control" id="cache_percentage" name="cache_percentage" value="{{ request.form.cache_percentage or 30 }}" min="0.1" max="100" required>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">计算</button>
+                    </div>
+                </form>
+
+                {% if results %}
+                    <div class="mt-4">
+                        {% if results.error %}
+                            <div class="alert alert-danger" role="alert">
+                                {{ results.error }}
+                            </div>
+                        {% else %}
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">计算结果：</h5>
+                                    <p class="card-text">每个标记的KV缓存内存：<strong>{{ results.kv_per_token_kb }}</strong></p>
+                                    <p class="card-text">总KV缓存内存：<strong>{{ results.total_kv_gb }}</strong></p>
+                                    <p class="card-text">估算所需GPU内存：<strong>{{ results.gpu_memory_gb }}</strong></p>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- 引入Bootstrap JS和依赖 (Popper.js) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
